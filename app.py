@@ -37,7 +37,7 @@ def set_background(image_name):
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.35);  /* 👈 less bright */
+            background: rgba(0,0,0,0.25);  /* 👈 less bright */
             z-index: -1;
         }}
         </style>
@@ -111,5 +111,6 @@ if predict_btn:
     st.success(f"✅ Predicted Bike Rentals: **{int(prediction)}**")
 
 st.dataframe(df, use_container_width=True)
+
 
 
