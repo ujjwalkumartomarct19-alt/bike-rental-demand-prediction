@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
-import pickle
+import joblib      # ✅ ADD THIS LINE
 import os
 import base64
+
 
 # ================= PAGE CONFIG =================
 st.set_page_config(page_title="Bike Rental Prediction", layout="wide")
@@ -110,4 +111,5 @@ if predict_btn:
     st.success(f"✅ Predicted Bike Rentals: **{int(prediction)}**")
 
 st.dataframe(df, use_container_width=True)
+
 
