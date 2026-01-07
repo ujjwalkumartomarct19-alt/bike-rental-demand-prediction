@@ -50,11 +50,23 @@ set_background("bike_bg.png")
 @st.cache_resource
 def load_files():
     base = os.path.dirname(__file__)
-    model = pickle.load(open(os.path.join(base, "bike_model.pkl"), "rb"))
-    scaler = pickle.load(open(os.path.join(base, "scaler.pkl"), "rb"))
+
+    model_path = os.path.join(base, "bike_model.pkl")
+    scaler_path = os.path.join(base, "scaler.pkl")
+
+    if not os.path.exists(model_path):
+        st.error("bike_model.pkl NOT FOUND in repository")
+        st.stop()
+
+    if not os.path.exists(scaler_path):
+        st.error("scaler.pkl NOT FOUND in repository")
+        st.stop()
+
+    model = pickle.load(open(model_path, "rb"))
+    scaler = pickle.load(open(scaler_path, "rb"))
+
     return model, scaler
 
-model, scaler = load_files()
 
 # ================= SIDEBAR INPUTS =================
 st.sidebar.title("Input Parameters")
@@ -97,5 +109,6 @@ if predict_btn:
     st.success(f"Predicted Bike Rentals: **{int(prediction)}**")
 
 st.dataframe(df, use_container_width=True)
+
 
 
