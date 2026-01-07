@@ -1,19 +1,18 @@
 import streamlit as st
 import pandas as pd
-import joblib      # ✅ ADD THIS LINE
+import joblib
 import os
 import base64
-
 
 # ================= PAGE CONFIG =================
 st.set_page_config(page_title="Bike Rental Prediction", layout="wide")
 
-# ================= BACKGROUND IMAGE =================
+# ================= BACKGROUND + CSS =================
 def set_background(image_name):
     image_path = os.path.join(os.path.dirname(__file__), image_name)
 
     if not os.path.exists(image_path):
-        return  # app should still run if image is missing
+        return
 
     with open(image_path, "rb") as f:
         encoded = base64.b64encode(f.read()).decode()
@@ -29,7 +28,7 @@ def set_background(image_name):
             background-attachment: fixed;
         }}
 
-        /* darker overlay for better readability */
+        /* dark overlay */
         .stApp::before {{
             content: "";
             position: fixed;
@@ -37,50 +36,28 @@ def set_background(image_name):
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.25);  /* 👈 less bright */
+            background: rgba(0,0,0,0.35);
             z-index: -1;
         }}
-       st.markdown(
-    f"""
-    <style>
-    .stApp {{
-        background-image: url("data:image/png;base64,{encoded}");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }}
 
-    /* dark overlay */
-    .stApp::before {{
-        content: "";
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.35);
-        z-index: -1;
-    }}
+        /* rounded main container */
+        .block-container {{
+            border-radius: 40px;
+            padding: 2rem;
+        }}
 
-    /* rounded corners for main app */
-    .block-container {{
-        border-radius: 40px;
-        padding: 2rem;
-    }}
-
-    /* rounded prediction box */
-    .rounded-box {{
-        background: white;
-        border-radius: 50px;   /* 👈 half circle look */
-        padding: 30px;
-        margin-top: 30px;
-        box-shadow: 0px 10px 25px rgba(0,0,0,0.15);
-        text-align: center;
-    }}
-    </style>
-    """,
-     unsafe_allow_html=True
+        /* rounded prediction box */
+        .rounded-box {{
+            background: white;
+            border-radius: 50px;
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: 0px 10px 25px rgba(0,0,0,0.15);
+            text-align: center;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
     )
 
 # APPLY BACKGROUND
@@ -100,9 +77,7 @@ def load_files():
     return model, scaler
 
 
-
-
-# ⚠️ DO NOT REMOVE THIS LINE
+# ⚠️ DO NOT REMOVE THIS
 model, scaler = load_files()
 
 # ================= SIDEBAR INPUTS =================
@@ -143,6 +118,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+st.dataframe(df, use_container_width=True)
+
+# ================= PREDICTION (BOTTOM BOX) =================
 if predict_btn:
     scaled = scaler.transform(df)
     prediction = model.predict(scaled)[0]
@@ -156,10 +134,4 @@ if predict_btn:
         """,
         unsafe_allow_html=True
     )
-
-
-st.dataframe(df, use_container_width=True)
-
-
-
 
