@@ -52,21 +52,15 @@ set_background("bike_bg.png")
 def load_files():
     base = os.path.dirname(__file__)
 
-    model_path = os.path.join(base, "bike_model.pkl")
-    scaler_path = os.path.join(base, "scaler.pkl")
+    model_path = os.path.join(base, "bike_model.joblib")
+    scaler_path = os.path.join(base, "scaler.joblib")
 
-    if not os.path.exists(model_path):
-        st.error("❌ bike_model.pkl not found in repository")
-        st.stop()
-
-    if not os.path.exists(scaler_path):
-        st.error("❌ scaler.pkl not found in repository")
-        st.stop()
-
-    model = pickle.load(open(model_path, "rb"))
-    scaler = pickle.load(open(scaler_path, "rb"))
+    model = joblib.load(model_path)
+    scaler = joblib.load(scaler_path)
 
     return model, scaler
+
+
 
 
 # ⚠️ DO NOT REMOVE THIS LINE
@@ -116,3 +110,4 @@ if predict_btn:
     st.success(f"✅ Predicted Bike Rentals: **{int(prediction)}**")
 
 st.dataframe(df, use_container_width=True)
+
