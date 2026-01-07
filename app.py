@@ -1,4 +1,4 @@
-importimport streamlit as st
+import streamlit as st
 import numpy as np
 import pandas as pd
 import pickle
@@ -114,6 +114,7 @@ with tab2:
         prediction = model.predict(scaled_data)[0]
 
         st.success(f"🚴 Predicted Bike Rentals: **{int(prediction)}**")
+
 
 
 
