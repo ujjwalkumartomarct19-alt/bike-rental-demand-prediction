@@ -6,6 +6,47 @@ import base64
 
 # ================= PAGE CONFIG =================
 st.set_page_config(page_title="Bike Rental Prediction", layout="wide")
+#===================BACKGRUND==============
+def set_bg(image_file):
+    with open(image_file, "rb") as f:
+        encoded = base64.b64encode(f.read()).decode()
+
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("data:image/png;base64,{encoded}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }}
+
+        /* watermark effect */
+        .stApp::before {{
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.75);
+            z-index: -1;
+         }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+# apply background
+set_bg("bike_bg.png")
+
+
+
+
+
+
+
 
 # ================= BACKGROUND + CSS =================
 def set_background(image_name):
@@ -134,4 +175,5 @@ if predict_btn:
         """,
         unsafe_allow_html=True
     )
+
 
