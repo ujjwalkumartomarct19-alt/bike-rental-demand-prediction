@@ -12,7 +12,7 @@ st.set_page_config(
 
 @st.cache_resource
 def load_files():
-    model = pickle.load(open("bike_model.pkl","rb"))
+    model = pickle.load(open("bike_model_optimized.pkl","rb"))
     scaler = pickle.load(open("scaler.pkl","rb"))
     return model, scaler
 
@@ -119,4 +119,5 @@ with tab2:
         scaled_data = scaler.transform(df)
         prediction = model.predict(scaled_data)[0]
         
+
         st.success(f" Predicted Bike Rentals: **{round(prediction)}**")
