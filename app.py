@@ -1,19 +1,20 @@
 import streamlit as st
-import numpy as np
 import pandas as pd
 import pickle
 import os
 import base64
 
 # ================= PAGE CONFIG =================
-st.set_page_config(
-    page_title="Bike Rental Prediction",
-    layout="wide"
-)
+st.set_page_config(page_title="Bike Rental Prediction", layout="wide")
 
 # ================= BACKGROUND IMAGE =================
-def set_bg(image_file):
-    with open(image_file, "rb") as f:
+def set_background(image_name):
+    image_path = os.path.join(os.path.dirname(__file__), image_name)
+
+    if not os.path.exists(image_path):
+        return  # run app even if image is missing
+
+    with open(image_path, "rb") as f:
         encoded = base64.b64encode(f.read()).decode()
 
     st.markdown(
@@ -27,7 +28,6 @@ def set_bg(image_file):
             background-attachment: fixed;
         }}
 
-        /* watermark effect */
         .stApp::before {{
             content: "";
             position: fixed;
@@ -43,19 +43,20 @@ def set_bg(image_file):
         unsafe_allow_html=True
     )
 
-# apply background
-set_bg("bike_bg.png")
+# APPLY BACKGROUND
+set_background("bike_bg.png")
 
 # ================= LOAD MODEL =================
 @st.cache_resource
 def load_files():
-    model = pickle.load(open("bike_model_optimized.pkl", "rb"))
-    scaler = pickle.load(open("scaler.pkl", "rb"))
+    base = os.path.dirname(__file__)
+    model = pickle.load(open(os.path.join(base, "bike_model.pkl"), "rb"))
+    scaler = pickle.load(open(os.path.join(base, "scaler.pkl"), "rb"))
     return model, scaler
 
 model, scaler = load_files()
 
-# ================= SIDEBAR =================
+# ================= SIDEBAR INPUTS =================
 st.sidebar.title("Input Parameters")
 
 season = st.sidebar.selectbox("Season", [0,1,2,3])
@@ -65,7 +66,7 @@ hr = st.sidebar.slider("Hour", 0, 23, 8)
 holiday = st.sidebar.selectbox("Holiday", [0,1])
 weekday = st.sidebar.slider("Weekday", 0, 6, 4)
 workingday = st.sidebar.selectbox("Working Day", [0,1])
-weathersit = st.sidebar.selectbox("Weather Situation", [0,1,2,3])
+weathersit = st.sidebar.selectbox("Weather", [0,1,2,3])
 temp = st.sidebar.slider("Temperature", 0.0, 1.0, 0.5)
 hum = st.sidebar.slider("Humidity", 0.0, 1.0, 0.5)
 windspeed = st.sidebar.slider("Windspeed", 0.0, 1.0, 0.5)
@@ -73,7 +74,7 @@ windspeed = st.sidebar.slider("Windspeed", 0.0, 1.0, 0.5)
 predict_btn = st.sidebar.button("Predict")
 
 # ================= INPUT DATA =================
-input_data = {
+df = pd.DataFrame([{
     "season": season,
     "yr": yr,
     "mnth": mnth,
@@ -85,36 +86,15 @@ input_data = {
     "temp": temp,
     "hum": hum,
     "windspeed": windspeed
-}
-
-df = pd.DataFrame([input_data])
+}])
 
 # ================= MAIN UI =================
-st.markdown("## 🚲 Bike Rental Demand Prediction")
+st.title("🚲 Bike Rental Demand Prediction")
 
-tab1, tab2 = st.tabs(["Info", "Prediction"])
+if predict_btn:
+    scaled = scaler.transform(df)
+    prediction = model.predict(scaled)[0]
+    st.success(f"Predicted Bike Rentals: **{int(prediction)}**")
 
-# -------- INFO TAB --------
-with tab1:
-    st.markdown("""
-    **This application predicts bike rental demand based on weather and time-related inputs.**
-
-    - Seasonality and weather conditions strongly affect bike usage  
-    - Working days and hours capture commuting behavior  
-    - Model is trained using historical bike rental data  
-    """)
-
-# -------- PREDICTION TAB --------
-with tab2:
-    st.subheader("Input Summary")
-    st.dataframe(df, use_container_width=True)
-
-    if predict_btn:
-        scaled_data = scaler.transform(df)
-        prediction = model.predict(scaled_data)[0]
-
-        st.success(f"🚴 Predicted Bike Rentals: **{int(prediction)}**")
-
-
-
+st.dataframe(df, use_container_width=True)
 
