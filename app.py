@@ -49,7 +49,7 @@ set_bg("bike_bg.png")
 # ================= LOAD MODEL =================
 @st.cache_resource
 def load_files():
-    model = pickle.load(open("bike_rental_model.pkl", "rb"))
+    model = pickle.load(open("bike_model_optimized.pkl", "rb"))
     scaler = pickle.load(open("scaler.pkl", "rb"))
     return model, scaler
 
@@ -114,5 +114,6 @@ with tab2:
         prediction = model.predict(scaled_data)[0]
 
         st.success(f"🚴 Predicted Bike Rentals: **{int(prediction)}**")
+
 
 
