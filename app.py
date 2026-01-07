@@ -35,7 +35,7 @@ def set_background(image_name):
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255,255,255,0.25);
+            background: rgba(155,155,155,0.25);
             z-index: -1;
         }}
         </style>
@@ -101,14 +101,19 @@ df = pd.DataFrame([{
 }])
 
 # ================= MAIN UI =================
-st.title("🚲 Bike Rental Demand Prediction")
+st.markdown(
+    "<h1 style='color:#000000;'>🚲 Bike Rental Demand Prediction</h1>",
+    unsafe_allow_html=True
+)
 
 if predict_btn:
     scaled = scaler.transform(df)
     prediction = model.predict(scaled)[0]
-    st.success(f"Predicted Bike Rentals: **{int(prediction)}**")
+    st.success(f"Predicted Bike Rentals: {int(prediction)}")
+
 
 st.dataframe(df, use_container_width=True)
+
 
 
 
