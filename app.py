@@ -35,7 +35,7 @@ def set_background(image_name):
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(155,155,155,0.25);
+            background: rgba(0,0,0,0.25);
             z-index: -1;
         }}
         </style>
@@ -54,18 +54,15 @@ def load_files():
     model_path = os.path.join(base, "bike_model.pkl")
     scaler_path = os.path.join(base, "scaler.pkl")
 
-    if not os.path.exists(model_path):
-        st.error("bike_model.pkl NOT FOUND in repository")
-        st.stop()
-
-    if not os.path.exists(scaler_path):
-        st.error("scaler.pkl NOT FOUND in repository")
-        st.stop()
-
     model = pickle.load(open(model_path, "rb"))
     scaler = pickle.load(open(scaler_path, "rb"))
 
     return model, scaler
+
+
+# ⚠️ THIS LINE IS MANDATORY (DO NOT REMOVE)
+model, scaler = load_files()
+
 
 
 # ================= SIDEBAR INPUTS =================
@@ -112,7 +109,9 @@ if predict_btn:
     st.success(f"Predicted Bike Rentals: {int(prediction)}")
 
 
+
 st.dataframe(df, use_container_width=True)
+
 
 
 
