@@ -40,9 +40,47 @@ def set_background(image_name):
             background: rgba(0,0,0,0.25);  /* 👈 less bright */
             z-index: -1;
         }}
-        </style>
-        """,
-        unsafe_allow_html=True
+       st.markdown(
+    f"""
+    <style>
+    .stApp {{
+        background-image: url("data:image/png;base64,{encoded}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }}
+
+    /* dark overlay */
+    .stApp::before {{
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.35);
+        z-index: -1;
+    }}
+
+    /* rounded corners for main app */
+    .block-container {{
+        border-radius: 40px;
+        padding: 2rem;
+    }}
+
+    /* rounded prediction box */
+    .rounded-box {{
+        background: white;
+        border-radius: 50px;   /* 👈 half circle look */
+        padding: 30px;
+        margin-top: 30px;
+        box-shadow: 0px 10px 25px rgba(0,0,0,0.15);
+        text-align: center;
+    }}
+    </style>
+    """,
+     unsafe_allow_html=True
     )
 
 # APPLY BACKGROUND
@@ -108,9 +146,20 @@ st.markdown(
 if predict_btn:
     scaled = scaler.transform(df)
     prediction = model.predict(scaled)[0]
-    st.success(f"✅ Predicted Bike Rentals: **{int(prediction)}**")
+
+    st.markdown(
+        f"""
+        <div class="rounded-box">
+            <h2 style="color:#000000;">✅ Predicted Bike Rentals</h2>
+            <h1 style="color:#2E7D32; font-size:48px;">{int(prediction)}</h1>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
 
 st.dataframe(df, use_container_width=True)
+
 
 
 
