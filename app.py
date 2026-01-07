@@ -5,11 +5,14 @@ import os
 import base64
 
 # ================= PAGE CONFIG =================
-st.set_page_config(page_title="Bike Rental Demand Prediction", layout="wide")
+st.set_page_config(page_title="Bike Rental Prediction", layout="wide")
 
-# ================= BACKGROUND + GLOBAL CSS =================
+# ================= BACKGROUND + CSS =================
 def set_background(image_name):
     image_path = os.path.join(os.path.dirname(__file__), image_name)
+
+    if not os.path.exists(image_path):
+        return
 
     with open(image_path, "rb") as f:
         encoded = base64.b64encode(f.read()).decode()
@@ -17,109 +20,89 @@ def set_background(image_name):
     st.markdown(
         f"""
         <style>
-        body {{
-            background-color: #0E1117;
-        }}
-
         .stApp {{
-            background-color: #0E1117;
-        }}
-
-        /* MAIN CARD */
-        .main-card {{
-            background: #111827;
-            border-radius: 40px;
-            padding: 25px;
-            margin-top: 20px;
-        }}
-
-        /* IMAGE BANNER */
-        .banner {{
             background-image: url("data:image/png;base64,{encoded}");
             background-size: cover;
             background-position: center;
-            border-radius: 30px;
-            padding: 35px;
-            height: 330px;
-            display: flex;
-            align-items: flex-start;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
         }}
 
-        .banner-title {{
-            font-size: 34px;
-            font-weight: 800;
-            color: #111111;
-            background: rgba(255,255,255,0.75);
-            padding: 12px 22px;
-            border-radius: 18px;
+        /* dark overlay */
+        .stApp::before {{
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.35);
+            z-index: -1;
         }}
 
-        /* PREDICTION CARD */
-        .pred-card {{
+        /* rounded main container */
+        .block-container {{
+            border-radius: 40px;
+            padding: 2rem;
+        }}
+
+        /* rounded prediction box */
+        .rounded-box {{
             background: white;
-            border-radius: 28px;
+            border-radius: 50px;
             padding: 30px;
-            margin-top: 25px;
-            box-shadow: 0px 8px 25px rgba(0,0,0,0.25);
+            margin-top: 40px;
+            box-shadow: 0px 10px 25px rgba(0,0,0,0.15);
             text-align: center;
         }}
-
-        .pred-title {{
-            font-size: 22px;
-            font-weight: 700;
-            color: #111;
-        }}
-
-        .pred-value {{
-            font-size: 52px;
-            font-weight: 900;
-            color: #2E7D32;
-            margin-top: 10px;
-        }}
-
-        /* SIDEBAR */
-        section[data-testid="stSidebar"] {{
-            background-color: #111827;
-            border-radius: 25px;
-        }}
-
         </style>
         """,
         unsafe_allow_html=True
     )
 
-# APPLY BACKGROUND IMAGE (YOUR BANNER IMAGE)
+# APPLY BACKGROUND
 set_background("bike_bg.png")
 
-# ================= LOAD MODEL =================
+# ================= LOAD MODEL & SCALER =================
 @st.cache_resource
 def load_files():
     base = os.path.dirname(__file__)
-    model = joblib.load(os.path.join(base, "bike_model.joblib"))
-    scaler = joblib.load(os.path.join(base, "scaler.joblib"))
+
+    model_path = os.path.join(base, "bike_model.joblib")
+    scaler_path = os.path.join(base, "scaler.joblib")
+
+    model = joblib.load(model_path)
+    scaler = joblib.load(scaler_path)
+
     return model, scaler
 
+
+# ⚠️ DO NOT REMOVE THIS
 model, scaler = load_files()
 
 # ================= SIDEBAR INPUTS =================
 st.sidebar.title("Input Parameters")
 
+season = st.sidebar.selectbox("Season", [0, 1, 2, 3])
+yr = st.sidebar.selectbox("Year", [0, 1])
+mnth = st.sidebar.slider("Month", 1, 12, 6)
+hr = st.sidebar.slider("Hour", 0, 23, 8)
 holiday = st.sidebar.selectbox("Holiday", [0, 1])
-weekday = st.sidebar.selectbox("Weekday", [0, 1, 2, 3, 4, 5, 6])
+weekday = st.sidebar.slider("Weekday", 0, 6, 4)
 workingday = st.sidebar.selectbox("Working Day", [0, 1])
 weathersit = st.sidebar.selectbox("Weather", [0, 1, 2, 3])
-temp = st.sidebar.slider("Temperature", 0.0, 1.0, 0.33)
-hum = st.sidebar.slider("Humidity", 0.0, 1.0, 0.68)
-windspeed = st.sidebar.slider("Windspeed", 0.0, 1.0, 0.20)
+temp = st.sidebar.slider("Temperature", 0.0, 1.0, 0.5)
+hum = st.sidebar.slider("Humidity", 0.0, 1.0, 0.5)
+windspeed = st.sidebar.slider("Windspeed", 0.0, 1.0, 0.5)
 
 predict_btn = st.sidebar.button("Predict")
 
 # ================= INPUT DATA =================
 df = pd.DataFrame([{
-    "season": 1,
-    "yr": 0,
-    "mnth": 6,
-    "hr": 8,
+    "season": season,
+    "yr": yr,
+    "mnth": mnth,
+    "hr": hr,
     "holiday": holiday,
     "weekday": weekday,
     "workingday": workingday,
@@ -130,32 +113,25 @@ df = pd.DataFrame([{
 }])
 
 # ================= MAIN UI =================
-st.markdown("<div class='main-card'>", unsafe_allow_html=True)
-
-# IMAGE BANNER
 st.markdown(
-    """
-    <div class="banner">
-        <div class="banner-title">🚲 Bike Rental Demand Prediction</div>
-    </div>
-    """,
+    "<h1 style='color:#000000; font-weight:800;'>🚲 Bike Rental Demand Prediction</h1>",
     unsafe_allow_html=True
 )
 
-# ================= PREDICTION =================
+st.dataframe(df, use_container_width=True)
+
+# ================= PREDICTION (BOTTOM BOX) =================
 if predict_btn:
     scaled = scaler.transform(df)
     prediction = model.predict(scaled)[0]
 
     st.markdown(
         f"""
-        <div class="pred-card">
-            <div class="pred-title">✅ Predicted Bike Rentals</div>
-            <div class="pred-value">{int(prediction)}</div>
+        <div class="rounded-box">
+            <h2 style="color:#000000;">✅ Predicted Bike Rentals</h2>
+            <h1 style="color:#2E7D32; font-size:48px;">{int(prediction)}</h1>
         </div>
         """,
         unsafe_allow_html=True
     )
-
-st.markdown("</div>", unsafe_allow_html=True)
 
