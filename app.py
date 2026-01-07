@@ -12,7 +12,7 @@ def set_background(image_name):
     image_path = os.path.join(os.path.dirname(__file__), image_name)
 
     if not os.path.exists(image_path):
-        return  # run app even if image is missing
+        return  # app should still run if image is missing
 
     with open(image_path, "rb") as f:
         encoded = base64.b64encode(f.read()).decode()
@@ -28,6 +28,7 @@ def set_background(image_name):
             background-attachment: fixed;
         }}
 
+        /* darker overlay for better readability */
         .stApp::before {{
             content: "";
             position: fixed;
@@ -35,7 +36,7 @@ def set_background(image_name):
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.25);
+            background: rgba(0,0,0,0.35);  /* 👈 less bright */
             z-index: -1;
         }}
         </style>
@@ -46,7 +47,7 @@ def set_background(image_name):
 # APPLY BACKGROUND
 set_background("bike_bg.png")
 
-# ================= LOAD MODEL =================
+# ================= LOAD MODEL & SCALER =================
 @st.cache_resource
 def load_files():
     base = os.path.dirname(__file__)
@@ -54,28 +55,34 @@ def load_files():
     model_path = os.path.join(base, "bike_model.pkl")
     scaler_path = os.path.join(base, "scaler.pkl")
 
+    if not os.path.exists(model_path):
+        st.error("❌ bike_model.pkl not found in repository")
+        st.stop()
+
+    if not os.path.exists(scaler_path):
+        st.error("❌ scaler.pkl not found in repository")
+        st.stop()
+
     model = pickle.load(open(model_path, "rb"))
     scaler = pickle.load(open(scaler_path, "rb"))
 
     return model, scaler
 
 
-# ⚠️ THIS LINE IS MANDATORY (DO NOT REMOVE)
+# ⚠️ DO NOT REMOVE THIS LINE
 model, scaler = load_files()
-
-
 
 # ================= SIDEBAR INPUTS =================
 st.sidebar.title("Input Parameters")
 
-season = st.sidebar.selectbox("Season", [0,1,2,3])
-yr = st.sidebar.selectbox("Year", [0,1])
+season = st.sidebar.selectbox("Season", [0, 1, 2, 3])
+yr = st.sidebar.selectbox("Year", [0, 1])
 mnth = st.sidebar.slider("Month", 1, 12, 6)
 hr = st.sidebar.slider("Hour", 0, 23, 8)
-holiday = st.sidebar.selectbox("Holiday", [0,1])
+holiday = st.sidebar.selectbox("Holiday", [0, 1])
 weekday = st.sidebar.slider("Weekday", 0, 6, 4)
-workingday = st.sidebar.selectbox("Working Day", [0,1])
-weathersit = st.sidebar.selectbox("Weather", [0,1,2,3])
+workingday = st.sidebar.selectbox("Working Day", [0, 1])
+weathersit = st.sidebar.selectbox("Weather", [0, 1, 2, 3])
 temp = st.sidebar.slider("Temperature", 0.0, 1.0, 0.5)
 hum = st.sidebar.slider("Humidity", 0.0, 1.0, 0.5)
 windspeed = st.sidebar.slider("Windspeed", 0.0, 1.0, 0.5)
@@ -99,20 +106,13 @@ df = pd.DataFrame([{
 
 # ================= MAIN UI =================
 st.markdown(
-    "<h1 style='color:#000000;'>🚲 Bike Rental Demand Prediction</h1>",
+    "<h1 style='color:#000000; font-weight:800;'>🚲 Bike Rental Demand Prediction</h1>",
     unsafe_allow_html=True
 )
 
 if predict_btn:
     scaled = scaler.transform(df)
     prediction = model.predict(scaled)[0]
-    st.success(f"Predicted Bike Rentals: {int(prediction)}")
-
-
+    st.success(f"✅ Predicted Bike Rentals: **{int(prediction)}**")
 
 st.dataframe(df, use_container_width=True)
-
-
-
-
-
